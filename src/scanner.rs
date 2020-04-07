@@ -80,7 +80,7 @@ impl Scanner {
             tokens: Vec::new(),
             start: 0,
             current: 0,
-            line: 0,
+            line: 1,
             keywords,
         }
     }
@@ -162,6 +162,31 @@ impl Scanner {
               if self.advance_if_equal('/') {
                   while self.peek() != '\n' && !self.is_at_end() {
                       self.advance();
+                  }
+              } else if self.advance_if_equal('*') { // Block comment
+                  let mut nesting_layer = 1;
+                  loop {
+                      if self.is_at_end() {
+                          let mut s = String::from("Unbalanced block comment");
+                          if nesting_layer > 0 {
+                              s.push_str(": missing closing */");
+                          }
+                          return Err(Error::new(s, self.line));
+                      } else if self.peek() == '/' && self.peek_next() == '*' {
+                          self.advance(); // Consume nested /
+                          self.advance(); // Consume nested *
+                          nesting_layer += 1;
+                      } else if self.peek() == '*' && self.peek_next() == '/' {
+                          if nesting_layer == 1 {
+                              self.advance(); // Consume closing *
+                              self.advance(); // Consume closing /
+                              break;
+                          } else {
+                              nesting_layer -= 1;
+                          }
+                      } else {
+                          self.advance();
+                      }
                   }
               } else {
                   self.add_token(TokenType::Slash);
@@ -395,7 +420,7 @@ mod tests {
         assert_eq!(s.tokens.len(), 0);
         assert_eq!(s.start, 0);
         assert_eq!(s.current, 0);
-        assert_eq!(s.line, 0);
+        assert_eq!(s.line, 1);
         assert_eq!(*s.keywords.get("nil").unwrap(), TokenType::Nil);
     }
     fn test_scanner_scanning() {
