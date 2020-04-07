@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 pub mod scanner;
 use scanner::*;
 
@@ -14,19 +13,17 @@ pub fn run(source: &str) -> Result<(), Error> {
 #[derive(Debug)]
 pub struct Error {
     pub message: String,
-    pub r#where: String,
     pub line: usize,
 }
 impl Error {
-    pub fn new(message: String, r#where: String, line: usize) -> Error {
+    pub fn new(message: String, line: usize) -> Error {
         Error {
             message,
-            r#where,
             line
         }
     }
     pub fn to_string(&self) -> String {
-        format!("[line {}] Error {}: {}", self.line, self.r#where, self.message)
+        format!("Error: [line {}] {}", self.line, self.message)
     }
     pub fn report(&self) {
         eprintln!("{}", self.to_string());

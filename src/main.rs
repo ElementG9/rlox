@@ -28,29 +28,39 @@ fn run_prompt() {
                 std::io::stdout().flush().unwrap();
                 match rlox::run(&input) {
                     Ok(_) => {},
-                    Err(err) => {
-                        println!("error: {}", err);
-                    }
+                    Err(err) => eprintln!("{}", err)
                 };
             }
-            Err(err) => println!("error reading input: {}", err),
+            Err(err) => eprintln!("Error reading input: {}", err),
         }
     }
 }
 fn run_file(filename: &str) {
     if !std::path::Path::new(&filename).exists() {
-        panic!(format!("Error running rlox file: {} does not exist", filename));
+        eprintln!("Error running rlox file: {} does not exist", filename);
+        std::process::exit(1);
     }
-    let mut file = File::open(&filename)
-        .expect(&format!("Error running rlox file: Could not open {}", filename));
+    let mut file = match File::open(&filename) {
+        Ok(file) => file,
+        Err(_err) => {
+            eprintln!("Error running rlox file: Could not open {}", filename);
+            std::process::exit(1);
+        }
+    };
     let mut contents = String::new();
-    file.read_to_string(&mut contents)
-        .expect("Error running rlox file: Could not copy to string");
+    match file.read_to_string(&mut contents) {
+        Ok(data) => data,
+        Err(_err) => {
+            eprintln!("Error running rlox file: Could not copy to string");
+            std::process::exit(1);
+        }
+    };
     match rlox::run(&contents) {
         Ok(_) => { // Exit cleanly.
             std::process::exit(0);
         },
-        Err(_err) => { // Exit with error.
+        Err(err) => { // Exit with error.
+            eprintln!("{}", err);
             std::process::exit(1);
         }
     };

@@ -205,7 +205,7 @@ impl Scanner {
               } else if is_alpha(c) {
                   self.read_identifier()?;
               } else {
-                  return Err(Error::new("Unexpected character.".to_owned(), String::new(), self.line));
+                  return Err(Error::new(format!("Unexpected character {}", c), self.line));
               }
           }
       };
@@ -253,7 +253,7 @@ impl Scanner {
 
         // Unterminated string.
         if self.is_at_end() {
-            Err(Error::new("Unterminated string".to_owned(), String::new(), self.line))
+            Err(Error::new("Unterminated string".to_owned(), self.line))
         } else {
             // The closing ".
             self.advance();
@@ -298,6 +298,7 @@ impl Scanner {
         }
     }
 }
+
 // Helper functions
 fn str_len(s: &String) -> usize {
     s.chars().count()
