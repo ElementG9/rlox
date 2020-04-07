@@ -1,3 +1,4 @@
-// this is a comment
-(( )){} // grouping stuff
+(( )){}        // grouping stuff
 !*+-/=<> <= == // operators
+test asdf jkl  // identifiers
+var fun class  // keywords
